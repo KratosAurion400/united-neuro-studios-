@@ -5,6 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -56,50 +58,68 @@ const SERVICES = [
 export default function ServicesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === 'web' && width >= 768;
+  const isLargeDesktop = Platform.OS === 'web' && width >= 1024;
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+      contentContainerStyle={[
+        styles.content, 
+        { paddingBottom: isDesktop ? 60 : insets.bottom + 100 },
+        isDesktop && styles.contentDesktop
+      ]}
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.pageLabel}>COMMISSIONS</Text>
-        <Text style={styles.pageTitle}>Service Tiers</Text>
-        <Text style={styles.pageSubtitle}>
-          Hand-drawn precision. Every frame crafted with neuro-focused intent.
-        </Text>
+      <View style={[styles.header, isDesktop && styles.headerDesktop]}>
+        <View style={[styles.headerInner, isLargeDesktop && styles.headerInnerLarge]}>
+          <Text style={styles.pageLabel}>COMMISSIONS</Text>
+          <Text style={[styles.pageTitle, isDesktop && styles.pageTitleDesktop]}>Service Tiers</Text>
+          <Text style={[styles.pageSubtitle, isDesktop && styles.pageSubtitleDesktop]}>
+            Hand-drawn precision. Every frame crafted with neuro-focused intent.
+          </Text>
+        </View>
       </View>
 
       {/* Service Cards */}
-      <View style={styles.servicesContainer}>
-        {SERVICES.map((service) => (
-          <ServiceCard key={service.id} service={service} onPress={() => router.push('/contact')} />
-        ))}
+      <View style={[styles.servicesContainer, isLargeDesktop && styles.servicesContainerLarge]}>
+        <View style={[styles.servicesGrid, isDesktop && styles.servicesGridDesktop]}>
+          {SERVICES.map((service) => (
+            <ServiceCard 
+              key={service.id} 
+              service={service} 
+              onPress={() => router.push('/contact')} 
+              isDesktop={isDesktop}
+            />
+          ))}
+        </View>
       </View>
 
       {/* Human Hand Mandate Notice */}
-      <View style={styles.mandateNotice}>
-        <LinearGradient
-          colors={[COLORS.secondary + '20', COLORS.primary + '20']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.mandateGradient}
-        >
-          <Ionicons name="hand-left" size={24} color={COLORS.primary} />
-          <Text style={styles.mandateTitle}>Human Hand Mandate</Text>
-          <Text style={styles.mandateText}>
-            We explicitly reject generative AI. Every frame we produce is drawn by a human hand, one transition at a time.
-          </Text>
-        </LinearGradient>
+      <View style={[styles.mandateContainer, isLargeDesktop && styles.mandateContainerLarge]}>
+        <View style={styles.mandateNotice}>
+          <LinearGradient
+            colors={[COLORS.secondary + '20', COLORS.primary + '20']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.mandateGradient}
+          >
+            <Ionicons name="hand-left" size={24} color={COLORS.primary} />
+            <Text style={styles.mandateTitle}>Human Hand Mandate</Text>
+            <Text style={styles.mandateText}>
+              We explicitly reject generative AI. Every frame we produce is drawn by a human hand, one transition at a time.
+            </Text>
+          </LinearGradient>
+        </View>
       </View>
 
       {/* CTA */}
-      <View style={styles.ctaSection}>
+      <View style={[styles.ctaSection, isLargeDesktop && styles.ctaSectionLarge]}>
         <Text style={styles.ctaText}>Ready to bring your vision to life?</Text>
         <TouchableOpacity
-          style={styles.ctaButton}
+          style={[styles.ctaButton, isDesktop && styles.ctaButtonDesktop]}
           onPress={() => router.push('/contact')}
           activeOpacity={0.8}
         >
@@ -114,13 +134,29 @@ export default function ServicesScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+
+      {/* Footer */}
+      <View style={[styles.footer, isDesktop && styles.footerDesktop]}>
+        <Text style={styles.footerText}>© 2026 United Neuro Studios. All Rights Reserved.</Text>
+      </View>
     </ScrollView>
   );
 }
 
-function ServiceCard({ service, onPress }: { service: typeof SERVICES[0]; onPress: () => void }) {
+function ServiceCard({ service, onPress, isDesktop }: { 
+  service: typeof SERVICES[0]; 
+  onPress: () => void;
+  isDesktop?: boolean;
+}) {
+  const [isHovered, setIsHovered] = React.useState(false);
+
   return (
-    <View style={[styles.serviceCard, service.popular && styles.popularCard]}>
+    <View style={[
+      styles.serviceCard, 
+      service.popular && styles.popularCard,
+      isDesktop && styles.serviceCardDesktop,
+      isHovered && styles.serviceCardHovered,
+    ]}>
       {service.popular && (
         <View style={styles.popularBadge}>
           <LinearGradient
@@ -135,7 +171,7 @@ function ServiceCard({ service, onPress }: { service: typeof SERVICES[0]; onPres
       )}
 
       <Text style={styles.serviceName}>{service.name}</Text>
-      <Text style={styles.servicePrice}>{service.price}</Text>
+      <Text style={[styles.servicePrice, isDesktop && styles.servicePriceDesktop]}>{service.price}</Text>
       <Text style={styles.serviceDescription}>{service.description}</Text>
 
       <View style={styles.divider} />
@@ -156,6 +192,10 @@ function ServiceCard({ service, onPress }: { service: typeof SERVICES[0]; onPres
         ]}
         onPress={onPress}
         activeOpacity={0.8}
+        {...(Platform.OS === 'web' ? {
+          onMouseEnter: () => setIsHovered(true),
+          onMouseLeave: () => setIsHovered(false),
+        } : {})}
       >
         {service.popular ? (
           <LinearGradient
@@ -182,12 +222,27 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
   },
+  contentDesktop: {
+    paddingHorizontal: 40,
+  },
   header: {
     paddingTop: 20,
     paddingBottom: 32,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
     marginBottom: 24,
+  },
+  headerDesktop: {
+    paddingTop: 60,
+    paddingBottom: 60,
+    alignItems: 'center',
+  },
+  headerInner: {
+    width: '100%',
+  },
+  headerInnerLarge: {
+    maxWidth: 1200,
+    alignItems: 'center',
   },
   pageLabel: {
     fontSize: 12,
@@ -202,13 +257,32 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginBottom: 8,
   },
+  pageTitleDesktop: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
   pageSubtitle: {
     fontSize: 16,
     color: COLORS.textMuted,
     lineHeight: 24,
   },
+  pageSubtitleDesktop: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
   servicesContainer: {
+    width: '100%',
+  },
+  servicesContainerLarge: {
+    maxWidth: 900,
+    alignSelf: 'center',
+  },
+  servicesGrid: {
     gap: 20,
+  },
+  servicesGridDesktop: {
+    flexDirection: 'row',
+    gap: 32,
   },
   serviceCard: {
     backgroundColor: COLORS.surface,
@@ -217,13 +291,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
+  serviceCardDesktop: {
+    flex: 1,
+    padding: 32,
+  },
+  serviceCardHovered: {
+    borderColor: COLORS.primary,
+  },
   popularCard: {
     borderColor: COLORS.primary,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
   },
   popularBadge: {
     position: 'absolute',
@@ -255,6 +331,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.primary,
     marginBottom: 12,
+  },
+  servicePriceDesktop: {
+    fontSize: 56,
   },
   serviceDescription: {
     fontSize: 14,
@@ -309,8 +388,15 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     letterSpacing: 1,
   },
-  mandateNotice: {
+  mandateContainer: {
+    width: '100%',
     marginTop: 32,
+  },
+  mandateContainerLarge: {
+    maxWidth: 600,
+    alignSelf: 'center',
+  },
+  mandateNotice: {
     borderRadius: 16,
     overflow: 'hidden',
   },
@@ -338,6 +424,11 @@ const styles = StyleSheet.create({
     marginTop: 32,
     alignItems: 'center',
   },
+  ctaSectionLarge: {
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
+  },
   ctaText: {
     fontSize: 16,
     color: COLORS.textMuted,
@@ -347,6 +438,9 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  ctaButtonDesktop: {
+    maxWidth: 300,
   },
   ctaGradient: {
     flexDirection: 'row',
@@ -360,5 +454,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.textLight,
     letterSpacing: 1,
+  },
+  footer: {
+    marginTop: 32,
+    paddingVertical: 24,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    alignItems: 'center',
+  },
+  footerDesktop: {
+    marginTop: 60,
+    paddingVertical: 40,
+  },
+  footerText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
   },
 });

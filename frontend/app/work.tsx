@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -48,14 +50,21 @@ const PORTFOLIO_ITEMS = [
 
 export default function WorkScreen() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === 'web' && width >= 768;
+  const isLargeDesktop = Platform.OS === 'web' && width >= 1024;
 
   const handleOpenLink = async (url: string, title: string) => {
     try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
+      if (Platform.OS === 'web') {
+        window.open(url, '_blank');
       } else {
-        Alert.alert('Error', `Cannot open link for ${title}`);
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+          await Linking.openURL(url);
+        } else {
+          Alert.alert('Error', `Cannot open link for ${title}`);
+        }
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to open gallery');
@@ -65,36 +74,45 @@ export default function WorkScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+      contentContainerStyle={[
+        styles.content, 
+        { paddingBottom: isDesktop ? 60 : insets.bottom + 100 },
+        isDesktop && styles.contentDesktop
+      ]}
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.pageLabel}>PORTFOLIO</Text>
-        <LinearGradient
-          colors={[COLORS.primary, COLORS.secondary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={styles.gradientBorder}
-        >
-          <View style={styles.titleContainer}>
-            <Text style={styles.pageTitle}>The Galleries</Text>
-          </View>
-        </LinearGradient>
-        <Text style={styles.pageSubtitle}>
-          Frame-by-frame artistry drawn with intent. No AI shortcuts.
-        </Text>
+      <View style={[styles.header, isDesktop && styles.headerDesktop]}>
+        <View style={[styles.headerInner, isLargeDesktop && styles.headerInnerLarge]}>
+          <Text style={styles.pageLabel}>PORTFOLIO</Text>
+          <LinearGradient
+            colors={[COLORS.primary, COLORS.secondary]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.gradientBorder}
+          >
+            <View style={styles.titleContainer}>
+              <Text style={[styles.pageTitle, isDesktop && styles.pageTitleDesktop]}>The Galleries</Text>
+            </View>
+          </LinearGradient>
+          <Text style={[styles.pageSubtitle, isDesktop && styles.pageSubtitleDesktop]}>
+            Frame-by-frame artistry drawn with intent. No AI shortcuts.
+          </Text>
+        </View>
       </View>
 
       {/* Gallery Cards */}
-      <View style={styles.galleryGrid}>
-        {PORTFOLIO_ITEMS.map((item) => (
-          <PortfolioCard
-            key={item.id}
-            item={item}
-            onPress={() => handleOpenLink(item.link, item.title)}
-          />
-        ))}
+      <View style={[styles.galleryContainer, isLargeDesktop && styles.galleryContainerLarge]}>
+        <View style={[styles.galleryGrid, isDesktop && styles.galleryGridDesktop]}>
+          {PORTFOLIO_ITEMS.map((item) => (
+            <PortfolioCard
+              key={item.id}
+              item={item}
+              onPress={() => handleOpenLink(item.link, item.title)}
+              isDesktop={isDesktop}
+            />
+          ))}
+        </View>
       </View>
 
       {/* Footer Note */}
@@ -104,30 +122,44 @@ export default function WorkScreen() {
           Tap any card to view the full gallery collection
         </Text>
       </View>
+
+      {/* Footer */}
+      <View style={[styles.footer, isDesktop && styles.footerDesktop]}>
+        <Text style={styles.footerText}>© 2026 United Neuro Studios. All Rights Reserved.</Text>
+      </View>
     </ScrollView>
   );
 }
 
-function PortfolioCard({ item, onPress }: { item: typeof PORTFOLIO_ITEMS[0]; onPress: () => void }) {
-  const [isPressed, setIsPressed] = React.useState(false);
+function PortfolioCard({ item, onPress, isDesktop }: { 
+  item: typeof PORTFOLIO_ITEMS[0]; 
+  onPress: () => void;
+  isDesktop?: boolean;
+}) {
+  const [isHovered, setIsHovered] = React.useState(false);
 
   return (
     <TouchableOpacity
       style={[
         styles.portfolioCard,
-        isPressed && styles.portfolioCardPressed,
+        isDesktop && styles.portfolioCardDesktop,
+        isHovered && styles.portfolioCardHovered,
       ]}
       onPress={onPress}
-      onPressIn={() => setIsPressed(true)}
-      onPressOut={() => setIsPressed(false)}
+      onPressIn={() => setIsHovered(true)}
+      onPressOut={() => setIsHovered(false)}
+      {...(Platform.OS === 'web' ? {
+        onMouseEnter: () => setIsHovered(true),
+        onMouseLeave: () => setIsHovered(false),
+      } : {})}
       activeOpacity={1}
     >
       <View style={styles.cardHeader}>
-        <Text style={styles.cardIcon}>{item.icon}</Text>
+        <Text style={[styles.cardIcon, isDesktop && styles.cardIconDesktop]}>{item.icon}</Text>
         <Ionicons name="open-outline" size={20} color={COLORS.primary} />
       </View>
       
-      <Text style={styles.cardTitle}>{item.title}</Text>
+      <Text style={[styles.cardTitle, isDesktop && styles.cardTitleDesktop]}>{item.title}</Text>
       <Text style={styles.cardDescription}>{item.description}</Text>
       
       <View style={styles.cardFooter}>
@@ -151,12 +183,27 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
   },
+  contentDesktop: {
+    paddingHorizontal: 40,
+  },
   header: {
     paddingTop: 20,
     paddingBottom: 32,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
     marginBottom: 24,
+  },
+  headerDesktop: {
+    paddingTop: 60,
+    paddingBottom: 60,
+    alignItems: 'center',
+  },
+  headerInner: {
+    width: '100%',
+  },
+  headerInnerLarge: {
+    maxWidth: 1200,
+    alignItems: 'center',
   },
   pageLabel: {
     fontSize: 12,
@@ -182,14 +229,32 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: 'center',
   },
+  pageTitleDesktop: {
+    fontSize: 48,
+  },
   pageSubtitle: {
     fontSize: 16,
     color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 24,
   },
+  pageSubtitleDesktop: {
+    fontSize: 18,
+    maxWidth: 500,
+  },
+  galleryContainer: {
+    width: '100%',
+  },
+  galleryContainerLarge: {
+    maxWidth: 1200,
+    alignSelf: 'center',
+  },
   galleryGrid: {
     gap: 16,
+  },
+  galleryGridDesktop: {
+    flexDirection: 'row',
+    gap: 24,
   },
   portfolioCard: {
     backgroundColor: COLORS.surface,
@@ -198,14 +263,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  portfolioCardPressed: {
+  portfolioCardDesktop: {
+    flex: 1,
+    padding: 32,
+  },
+  portfolioCardHovered: {
     borderColor: COLORS.primary,
-    transform: [{ translateY: -2 }],
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    transform: [{ translateY: -4 }],
   },
   cardHeader: {
     flexDirection: 'row',
@@ -216,11 +280,17 @@ const styles = StyleSheet.create({
   cardIcon: {
     fontSize: 32,
   },
+  cardIconDesktop: {
+    fontSize: 48,
+  },
   cardTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.textLight,
     marginBottom: 8,
+  },
+  cardTitleDesktop: {
+    fontSize: 24,
   },
   cardDescription: {
     fontSize: 14,
@@ -255,5 +325,21 @@ const styles = StyleSheet.create({
   footerNoteText: {
     fontSize: 13,
     color: COLORS.textMuted,
+  },
+  footer: {
+    marginTop: 32,
+    paddingVertical: 24,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    alignItems: 'center',
+  },
+  footerDesktop: {
+    marginTop: 60,
+    paddingVertical: 40,
+  },
+  footerText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
   },
 });

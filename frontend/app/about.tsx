@@ -4,6 +4,8 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,57 +23,70 @@ const COLORS = {
 
 export default function AboutScreen() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === 'web' && width >= 768;
+  const isLargeDesktop = Platform.OS === 'web' && width >= 1024;
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+      contentContainerStyle={[
+        styles.content, 
+        { paddingBottom: isDesktop ? 60 : insets.bottom + 100 },
+        isDesktop && styles.contentDesktop
+      ]}
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.pageLabel}>ABOUT US</Text>
-        <LinearGradient
-          colors={[COLORS.primary, COLORS.secondary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={styles.gradientBorder}
-        >
-          <View style={styles.titleContainer}>
-            <Text style={styles.pageTitle}>The Collective</Text>
-          </View>
-        </LinearGradient>
-        <Text style={styles.highlightText}>
-          United Neuro Studios is a veteran-owned digital art boutique specializing in neuro-precision motion design.
-        </Text>
+      <View style={[styles.header, isDesktop && styles.headerDesktop]}>
+        <View style={[styles.headerInner, isLargeDesktop && styles.headerInnerLarge]}>
+          <Text style={styles.pageLabel}>ABOUT US</Text>
+          <LinearGradient
+            colors={[COLORS.primary, COLORS.secondary]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.gradientBorder}
+          >
+            <View style={styles.titleContainer}>
+              <Text style={[styles.pageTitle, isDesktop && styles.pageTitleDesktop]}>The Collective</Text>
+            </View>
+          </LinearGradient>
+          <Text style={[styles.highlightText, isDesktop && styles.highlightTextDesktop]}>
+            United Neuro Studios is a veteran-owned digital art boutique specializing in neuro-precision motion design.
+          </Text>
+        </View>
       </View>
 
       {/* Content Sections */}
-      <View style={styles.sectionsContainer}>
-        {/* Veteran Founded */}
-        <AboutSection
-          icon="flag"
-          title="Veteran Founded"
-          iconColor={COLORS.primary}
-        >
-          <Text style={styles.sectionText}>
-            Lead Artist <Text style={styles.highlight}>ArtMagic</Text> is a Navy Veteran and Senior Concept Artist. Military discipline, paired with a neuro-divergent perspective (Autism/ADHD), allows for a level of hyper-focus that defines our signature liquid-motion style.
-          </Text>
-        </AboutSection>
+      <View style={[styles.sectionsContainer, isLargeDesktop && styles.sectionsContainerLarge]}>
+        <View style={[styles.sectionsGrid, isDesktop && styles.sectionsGridDesktop]}>
+          {/* Veteran Founded */}
+          <AboutSection
+            icon="flag"
+            title="Veteran Founded"
+            iconColor={COLORS.primary}
+            isDesktop={isDesktop}
+          >
+            <Text style={styles.sectionText}>
+              Lead Artist <Text style={styles.highlight}>ArtMagic</Text> is a Navy Veteran and Senior Concept Artist. Military discipline, paired with a neuro-divergent perspective (Autism/ADHD), allows for a level of hyper-focus that defines our signature liquid-motion style.
+            </Text>
+          </AboutSection>
 
-        {/* Sheltered Operations */}
-        <AboutSection
-          icon="shield-checkmark"
-          title="Sheltered Operations"
-          iconColor={COLORS.secondary}
-        >
-          <Text style={styles.sectionText}>
-            <Text style={styles.highlight}>LaborActivist420</Text> manages all studio logistics and client relations, ensuring the Lead Artist remains in a "sheltered" environment, focusing entirely on high-fidelity production.
-          </Text>
-        </AboutSection>
+          {/* Sheltered Operations */}
+          <AboutSection
+            icon="shield-checkmark"
+            title="Sheltered Operations"
+            iconColor={COLORS.secondary}
+            isDesktop={isDesktop}
+          >
+            <Text style={styles.sectionText}>
+              <Text style={styles.highlight}>LaborActivist420</Text> manages all studio logistics and client relations, ensuring the Lead Artist remains in a "sheltered" environment, focusing entirely on high-fidelity production.
+            </Text>
+          </AboutSection>
+        </View>
 
         {/* Human Hand Mandate */}
-        <View style={styles.mandateSection}>
+        <View style={[styles.mandateSection, isDesktop && styles.mandateSectionDesktop]}>
           <LinearGradient
             colors={[COLORS.secondary, COLORS.primary]}
             start={{ x: 0, y: 0 }}
@@ -79,21 +94,21 @@ export default function AboutScreen() {
             style={styles.mandateGradient}
           >
             <View style={styles.mandateInner}>
-              <View style={styles.mandateHeader}>
-                <Ionicons name="hand-left" size={32} color={COLORS.primary} />
-                <Text style={styles.mandateTitle}>Human Hand Mandate</Text>
+              <View style={[styles.mandateHeader, isDesktop && styles.mandateHeaderDesktop]}>
+                <Ionicons name="hand-left" size={isDesktop ? 40 : 32} color={COLORS.primary} />
+                <Text style={[styles.mandateTitle, isDesktop && styles.mandateTitleDesktop]}>Human Hand Mandate</Text>
               </View>
-              <Text style={styles.mandateText}>
+              <Text style={[styles.mandateText, isDesktop && styles.mandateTextDesktop]}>
                 We explicitly reject generative AI. Every frame we produce is drawn by a human hand, one transition at a time.
               </Text>
               <View style={styles.mandateDivider} />
-              <View style={styles.mandateStats}>
+              <View style={[styles.mandateStats, isDesktop && styles.mandateStatsDesktop]}>
                 <View style={styles.statItem}>
-                  <Text style={styles.statValue}>100%</Text>
+                  <Text style={[styles.statValue, isDesktop && styles.statValueDesktop]}>100%</Text>
                   <Text style={styles.statLabel}>HUMAN CRAFTED</Text>
                 </View>
                 <View style={styles.statItem}>
-                  <Text style={styles.statValue}>0%</Text>
+                  <Text style={[styles.statValue, isDesktop && styles.statValueDesktop]}>0%</Text>
                   <Text style={styles.statLabel}>AI GENERATED</Text>
                 </View>
               </View>
@@ -103,27 +118,33 @@ export default function AboutScreen() {
       </View>
 
       {/* Values */}
-      <View style={styles.valuesSection}>
+      <View style={[styles.valuesSection, isLargeDesktop && styles.valuesSectionLarge]}>
         <Text style={styles.valuesSectionTitle}>OUR VALUES</Text>
-        <View style={styles.valuesGrid}>
-          <ValueCard icon="eye" label="Precision" />
-          <ValueCard icon="heart" label="Passion" />
-          <ValueCard icon="flash" label="Focus" />
-          <ValueCard icon="diamond" label="Quality" />
+        <View style={[styles.valuesGrid, isDesktop && styles.valuesGridDesktop]}>
+          <ValueCard icon="eye" label="Precision" isDesktop={isDesktop} />
+          <ValueCard icon="heart" label="Passion" isDesktop={isDesktop} />
+          <ValueCard icon="flash" label="Focus" isDesktop={isDesktop} />
+          <ValueCard icon="diamond" label="Quality" isDesktop={isDesktop} />
         </View>
+      </View>
+
+      {/* Footer */}
+      <View style={[styles.footer, isDesktop && styles.footerDesktop]}>
+        <Text style={styles.footerText}>© 2026 United Neuro Studios. All Rights Reserved.</Text>
       </View>
     </ScrollView>
   );
 }
 
-function AboutSection({ icon, title, children, iconColor }: {
+function AboutSection({ icon, title, children, iconColor, isDesktop }: {
   icon: string;
   title: string;
   children: React.ReactNode;
   iconColor: string;
+  isDesktop?: boolean;
 }) {
   return (
-    <View style={styles.section}>
+    <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
       <View style={styles.sectionHeader}>
         <View style={[styles.sectionIcon, { borderColor: iconColor }]}>
           <Ionicons name={icon as any} size={24} color={iconColor} />
@@ -135,11 +156,11 @@ function AboutSection({ icon, title, children, iconColor }: {
   );
 }
 
-function ValueCard({ icon, label }: { icon: string; label: string }) {
+function ValueCard({ icon, label, isDesktop }: { icon: string; label: string; isDesktop?: boolean }) {
   return (
-    <View style={styles.valueCard}>
-      <Ionicons name={icon as any} size={24} color={COLORS.primary} />
-      <Text style={styles.valueLabel}>{label}</Text>
+    <View style={[styles.valueCard, isDesktop && styles.valueCardDesktop]}>
+      <Ionicons name={icon as any} size={isDesktop ? 32 : 24} color={COLORS.primary} />
+      <Text style={[styles.valueLabel, isDesktop && styles.valueLabelDesktop]}>{label}</Text>
     </View>
   );
 }
@@ -152,12 +173,27 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
   },
+  contentDesktop: {
+    paddingHorizontal: 40,
+  },
   header: {
     paddingTop: 20,
     paddingBottom: 32,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
     marginBottom: 24,
+  },
+  headerDesktop: {
+    paddingTop: 60,
+    paddingBottom: 60,
+    alignItems: 'center',
+  },
+  headerInner: {
+    width: '100%',
+  },
+  headerInnerLarge: {
+    maxWidth: 800,
+    alignItems: 'center',
   },
   pageLabel: {
     fontSize: 12,
@@ -183,14 +219,34 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.textLight,
   },
+  pageTitleDesktop: {
+    fontSize: 48,
+  },
   highlightText: {
     fontSize: 16,
     color: COLORS.primary,
     lineHeight: 26,
     fontWeight: '500',
   },
+  highlightTextDesktop: {
+    fontSize: 18,
+    textAlign: 'center',
+    maxWidth: 600,
+  },
   sectionsContainer: {
     gap: 24,
+  },
+  sectionsContainerLarge: {
+    maxWidth: 1000,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  sectionsGrid: {
+    gap: 24,
+  },
+  sectionsGridDesktop: {
+    flexDirection: 'row',
+    gap: 32,
   },
   section: {
     backgroundColor: COLORS.surface,
@@ -198,6 +254,10 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
+  },
+  sectionDesktop: {
+    flex: 1,
+    padding: 32,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -232,6 +292,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
+  mandateSectionDesktop: {
+    maxWidth: 700,
+    alignSelf: 'center',
+    width: '100%',
+  },
   mandateGradient: {
     padding: 2,
     borderRadius: 16,
@@ -247,15 +312,25 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 16,
   },
+  mandateHeaderDesktop: {
+    justifyContent: 'center',
+  },
   mandateTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.textLight,
   },
+  mandateTitleDesktop: {
+    fontSize: 28,
+  },
   mandateText: {
     fontSize: 15,
     color: COLORS.textMuted,
     lineHeight: 24,
+  },
+  mandateTextDesktop: {
+    fontSize: 16,
+    textAlign: 'center',
   },
   mandateDivider: {
     height: 1,
@@ -266,6 +341,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
   },
+  mandateStatsDesktop: {
+    gap: 80,
+    justifyContent: 'center',
+  },
   statItem: {
     alignItems: 'center',
   },
@@ -273,6 +352,9 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '800',
     color: COLORS.primary,
+  },
+  statValueDesktop: {
+    fontSize: 48,
   },
   statLabel: {
     fontSize: 10,
@@ -287,6 +369,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },
+  valuesSectionLarge: {
+    maxWidth: 800,
+    alignSelf: 'center',
+    width: '100%',
+  },
   valuesSectionTitle: {
     fontSize: 12,
     fontWeight: '600',
@@ -299,6 +386,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
   },
+  valuesGridDesktop: {
+    gap: 24,
+    justifyContent: 'center',
+  },
   valueCard: {
     width: '47%',
     backgroundColor: COLORS.surface,
@@ -308,6 +399,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
+  valueCardDesktop: {
+    width: 'auto',
+    minWidth: 150,
+    padding: 32,
+  },
   valueLabel: {
     fontSize: 12,
     fontWeight: '600',
@@ -315,5 +411,25 @@ const styles = StyleSheet.create({
     marginTop: 8,
     letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  valueLabelDesktop: {
+    fontSize: 14,
+    marginTop: 12,
+  },
+  footer: {
+    marginTop: 32,
+    paddingVertical: 24,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    alignItems: 'center',
+  },
+  footerDesktop: {
+    marginTop: 60,
+    paddingVertical: 40,
+  },
+  footerText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
   },
 });
