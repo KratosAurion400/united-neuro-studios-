@@ -139,6 +139,11 @@ export default function HomeScreen() {
           <Text style={styles.viewServicesBtnText}>VIEW FULL SERVICES</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>© 2026 United Neuro Studios. All Rights Reserved.</Text>
+      </View>
     </ScrollView>
   );
 }
@@ -335,5 +340,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.primary,
     letterSpacing: 1,
+  },
+  footer: {
+    marginTop: 32,
+    paddingVertical: 24,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
   },
 });

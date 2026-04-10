@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
@@ -13,6 +13,14 @@ const COLORS = {
   textMuted: '#a0a0a0',
   border: '#1a1a1a',
 };
+
+function Footer() {
+  return (
+    <View style={styles.footer}>
+      <Text style={styles.footerText}>© 2026 United Neuro Studios. All Rights Reserved.</Text>
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const insets = useSafeAreaInsets();
@@ -94,5 +102,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
+  },
+  footer: {
+    backgroundColor: COLORS.surface,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  footerText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    letterSpacing: 0.5,
   },
 });
